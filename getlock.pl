@@ -1,6 +1,5 @@
 #!/usr/bin/perl
-use lib ("/etc/puppet/bin/lib");
-use lib ("/opt/glasir/system/bin/lib");
+use lib ("/etc/puppet/files/bin/lib");
 use process_lock;
 
 my($filename) = $ARGV[0];
