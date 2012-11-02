@@ -11,7 +11,7 @@ LIST="${1}"
 BASE_DIR="/etc/puppet/state/${FACTER_iteego_environment}/${hostname}"
 
 pushd /etc/puppet &>/dev/null
-bin/getlock.pl /tmp/watch_files.lock $$
+files/bin/getlock.pl /tmp/watch_files.lock $$
 if [ $? == 0 ]; then
 #  should_update=0
   while /bin/true
@@ -33,7 +33,7 @@ if [ $? == 0 ]; then
             cat $file > "${BASE_DIR}${file}"
           fi
         done
-        /etc/puppet/bin/commit-state.sh &>> "${LOGFILE}"
+        /etc/puppet/files/bin/commit-state.sh &>> "${LOGFILE}"
 #      fi
 #      inotifywait -q -t $TIMEOUT -e modify,close_write --fromfile "${LIST}" &>> $LOGFILE; should_update=$?
        sleep 1

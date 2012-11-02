@@ -84,11 +84,6 @@ git submodule init
 git submodule update
 popd &>/dev/null
 
-# Clone all puppet modules
-pushd /etc/puppet/modules &>/dev/null
-./clone-modules.sh
-pupd &>/dev/null
-
 # Make a log file for puppet
 LOG_FILE=/var/log/puppet/puppet.log
 touch $LOG_FILE
@@ -98,7 +93,7 @@ chmod 600 $LOG_FILE
 echo 'SHELL=/bin/bash' >/tmp/.cron
 echo 'MAILTO=admin@iteego.com' >>/tmp/.cron
 echo -n "${ITEEGO_POLL_SCHEDULE}" >>/tmp/.cron
-echo ' [ -e /etc/puppet/bin/update.sh ] && /etc/puppet/bin/update.sh &>> /var/log/puppet/puppet.log' >>/tmp/.cron
+echo ' [ -e /etc/puppet/files/bin/update.sh ] && /etc/puppet/files/bin/update.sh &>> /var/log/puppet/puppet.log' >>/tmp/.cron
 crontab /tmp/.cron
 rm /tmp/.cron
 

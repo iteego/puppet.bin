@@ -7,7 +7,7 @@
 hostname=`hostname -s`
 
 pushd /etc/puppet &>/dev/null
-bin/getlock.pl /tmp/commit_state.lock $$
+files/bin/getlock.pl /tmp/commit_state.lock $$
 if [ $? == 0 ]; then
 
   # First of all, if our node does not have a state folder, create one

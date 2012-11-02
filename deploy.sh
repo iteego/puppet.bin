@@ -5,7 +5,7 @@
 hostname=`hostname -s`
 
 pushd /etc/puppet &>/dev/null
-bin/getlock.pl /tmp/service_deployment.lock $$
+files/bin/getlock.pl /tmp/service_deployment.lock $$
 if [ $? == 0 ]; then
 
   # if artifact already exists and is the active artifact and service is running, exit 255
@@ -105,7 +105,7 @@ if [ $? == 0 ]; then
     fi
 
     # lastly, make sure to trigger an update so that the state repo gets quickly written back
-    [ -e /etc/puppet/bin/commit-state.sh ] && nohup /etc/puppet/bin/commit-state.sh &>> /var/log/puppet/puppet.log &
+    [ -e /etc/puppet/files/bin/commit-state.sh ] && nohup /etc/puppet/files/bin/commit-state.sh &>> /var/log/puppet/puppet.log &
   else
     #TODO: Further error handling needs to go here. What happens if we still fail to start up the old version?
     # status returned non-zero, i.e. we failed starting up
