@@ -5,7 +5,7 @@
   && echo "FATAL: \$FACTER_iteego_environment not defined!" \
   && exit 1
 
-timeout -k 330 300 \
+timeout -k 10 290 \
 nice \
 puppet apply \
     --environment=production \
