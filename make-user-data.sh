@@ -38,7 +38,7 @@
 #
 result=0
 pushd `dirname $0`/.. &>/dev/null
-
+ 
 if [ $# -ne 2 ]
 then
   echo "Usage: $0 <environment> <node>"
