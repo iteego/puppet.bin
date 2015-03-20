@@ -1,4 +1,5 @@
-# REQUIRED VARIABLES, TO BE SET WITH EXPORT STATEMENTS PRIOR TO RUNNING.
+#-*- mode: sh; -*-
+# REQUIRED VARIABLES, TO BE SET WITH EXPORT STATEMENTS PRIOR TO RUNNING. 
 # Do not continue without these...
 [ -z "$ITEEGO_NODE" -o -z "$ITEEGO_REPO" -o -z "$ITEEGO_RSA_KEY" ] && exit 255
 
@@ -53,10 +54,10 @@ apt-get -q -y --force-yes install lsb-core git rubygems puppet
 # Information about our linux release (ubuntu/debian)
 # Write all of the info from lsb-release into /etc/environment as puppet facts
 # This will give puppet access to the information in a facter context when it runs
-echo "FACTER_distrib_id=$(lsb_release -i -s)" >>/etc/environment
-echo "FACTER_distrib_release=$(lsb_release -r -s)" >>/etc/environment
-echo "FACTER_distrib_codename=$(lsb_release -c -s)" >>/etc/environment
-echo "FACTER_distrib_description=\"$(lsb_release -d -s)\"" >>/etc/environment
+echo "export FACTER_distrib_id=$(lsb_release -i -s)" >>/etc/environment
+echo "export FACTER_distrib_release=$(lsb_release -r -s)" >>/etc/environment
+echo "export FACTER_distrib_codename=$(lsb_release -c -s)" >>/etc/environment
+echo "export FACTER_distrib_description=\"$(lsb_release -d -s)\"" >>/etc/environment
 
 
 # Deploy our SSH key
