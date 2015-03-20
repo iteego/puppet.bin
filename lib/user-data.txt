@@ -46,14 +46,18 @@
 echo "export FACTER_iteego_environment=${ITEEGO_ENVIRONMENT}" >>/etc/environment
 echo "export FACTER_iteego_branch=${ITEEGO_BRANCH}" >>/etc/environment
 
-# Information about our linux release (ubuntu/debian)
-# Write all of the info from /etc/lsb-release, if it exists, into /etc/environment as puppet facts
-# This will give puppet access to the information in a facter context when it runs
-[ -f /etc/lsb-release ] && cat /etc/lsb-release | sed 's/\(.*\)\=\(.*\)/export FACTER_\L\1\E=\2/g' >>/etc/environment
-
 # Update our system from bare minimum to usable level
 apt-get -q -y --force-yes update
-apt-get -q -y --force-yes install git-core rubygems puppet
+apt-get -q -y --force-yes install lsb-core git rubygems puppet
+
+# Information about our linux release (ubuntu/debian)
+# Write all of the info from lsb-release into /etc/environment as puppet facts
+# This will give puppet access to the information in a facter context when it runs
+echo "FACTER_distrib_id=$(lsb_release -i -s)" >>/etc/environment
+echo "FACTER_distrib_release=$(lsb_release -r -s)" >>/etc/environment
+echo "FACTER_distrib_codename=$(lsb_release -c -s)" >>/etc/environment
+echo "FACTER_distrib_description=\"$(lsb_release -d -s)\"" >>/etc/environment
+
 
 # Deploy our SSH key
 [ -d ~/.ssh ] || mkdir ~/.ssh
@@ -72,7 +76,10 @@ rm /etc/hosts.bak
 
 # Our changes are done, restart the hostname service and reload hostname in the kernel
 hostname $ITEEGO_NODE.$ITEEGO_DOMAIN
-restart hostname
+HOSTNAME_SERVICE=$(ls /etc/init.d/ | grep hostname)
+service $HOSTNAME_SERVICE stop
+service $HOSTNAME_SERVICE start
+
 
 # Pull down our system manifest (first remove the stock puppet config)
 rm -fR /etc/puppet &>/dev/null
