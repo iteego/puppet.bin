@@ -70,12 +70,8 @@ chmod 600 ~/.ssh/*
 # Set the host name to node name to tell puppet which node to invoke
 echo "${ITEEGO_NODE}.${ITEEGO_DOMAIN}" >/etc/hostname
 
-# Build new /etc/hosts file with our new node name in it
-mv /etc/hosts /etc/hosts.bak
-sed "s/ localhost/ localhost ${ITEEGO_NODE}.${ITEEGO_DOMAIN} ${ITEEGO_NODE}/g" /etc/hosts.bak > /etc/hosts
-rm /etc/hosts.bak
-
-# Our changes are done, restart the hostname service and reload hostname in the kernel
+# Update hostname and restart the hostname service
+sed -i "s/\(127.0.0.1[[:space:]]*.*\)/\1 ${ITEEGO_NODE}.${ITEEGO_DOMAIN} ${ITEEGO_NODE}/g" /etc/hosts
 hostname $ITEEGO_NODE.$ITEEGO_DOMAIN
 HOSTNAME_SERVICE=$(ls /etc/init.d/ | grep hostname)
 service $HOSTNAME_SERVICE stop
