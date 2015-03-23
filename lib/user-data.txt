@@ -75,10 +75,10 @@ set | grep ITEEGO | sed 's/\([^=]*\)=\(.*\)/export FACTER_\L\1=\2/g' >>/etc/envi
 
 # Deploy our SSH key
 [ -d /root/.ssh ] || mkdir /root/.ssh
-echo "$RSA_KEY" >~/.ssh/id_rsa
-echo "StrictHostKeyChecking=no" >>~/.ssh/config
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/*
+echo "$RSA_KEY" >/root/.ssh/id_rsa
+echo "StrictHostKeyChecking=no" >>/root/.ssh/config
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/*
 
 # Pull down our system manifest (first remove the stock puppet config)
 rm -fR /etc/puppet &>/dev/null
