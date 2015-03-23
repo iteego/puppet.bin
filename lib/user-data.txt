@@ -86,8 +86,8 @@ git clone $FACTER_iteego_repo /etc/puppet
 chmod 701 /etc/puppet
 pushd /etc/puppet &>/dev/null
 git checkout $FACTER_iteego_branch
-git submodule init
-git submodule update
+#git submodule init
+#git submodule update
 popd &>/dev/null
 
 # Make a log file for puppet

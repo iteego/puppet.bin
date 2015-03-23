@@ -9,7 +9,7 @@ branch_name=$(git symbolic-ref -q HEAD); branch_name=${branch_name##refs/heads/}
 
 # Do a pull, but filter out lines we don't want to see in the puppet log
 nice git pull | grep -v "github.com" | grep -v FETCH_HEAD | grep -v "Already up-to-date."
-nice git submodule init &>/dev/null
-nice git submodule update | grep "Submodule path"
+#nice git submodule init &>/dev/null
+#nice git submodule update | grep "Submodule path"
 
 popd &>/dev/null
