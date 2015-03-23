@@ -82,10 +82,10 @@ chmod 600 ~/.ssh/*
 
 # Pull down our system manifest (first remove the stock puppet config)
 rm -fR /etc/puppet &>/dev/null
-git clone $ITEEGO_REPO /etc/puppet
+git clone $FACTER_iteego_repo /etc/puppet
 chmod 701 /etc/puppet
 pushd /etc/puppet &>/dev/null
-git checkout $ITEEGO_BRANCH
+git checkout $FACTER_iteego_branch
 git submodule init
 git submodule update
 popd &>/dev/null
