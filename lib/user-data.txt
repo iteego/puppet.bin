@@ -1,20 +1,27 @@
 #-*- mode: sh; -*-
-# REQUIRED VARIABLES, TO BE SET WITH EXPORT STATEMENTS PRIOR TO RUNNING. 
-# Do not continue without these...
-[ -z "$ITEEGO_NODE" -o -z "$ITEEGO_REPO" -o -z "$ITEEGO_RSA_KEY" ] && exit 255
+
+########################################
+# REQUIRED VARIABLES
+
+# Will not continue without these...
+[ -z "$ITEEGO_NODE" -o -z "$ITEEGO_REPO" -o -z "$RSA_KEY" ] && exit 255
 
 # ITEEGO_NODE is the name of the puppet node to instantiate, like "storage"
 
 # ITEEGO_REPO is a pointer back to the git repository
 # containing the system manifests, for example:
-# ITEEGO_REPO="git@github.com:iteego/iteego.srv.git"
+# ITEEGO_REPO="git@github.com:iteego/iteego.system.git"
 
-# ITEEGO_RSA_KEY is used to connect to the back-end git server
+# RSA_KEY is used to connect to the back-end git server
 # holding the system manifest.
 # You can set the value before calling this script like this:
-# ITEEGO_RSA_KEY=\$(cat <<SETVAR
+# RSA_KEY=\$(cat <<SETVAR
 # ... key contents ...
 # SETVAR)
+
+
+########################################
+# OPTIONAL VARIABLES / DEFAULTS
 
 # ITEEGO_POLL_REPO is a flag, which when evaluates to true,
 # causes this server to continuously poll the repo for changes
@@ -38,18 +45,19 @@
 # most likely you will not need to use this
 [ -z "$ITEEGO_ENVIRONMENT" ] && ITEEGO_ENVIRONMENT=production
 
+
+########################################
 # DO THE WORK
 
+# Update our system to usable level
+apt-get -q -y --force-yes update
+apt-get -q -y --force-yes dist-upgrade
+apt-get -q -y --force-yes install lsb-core curl git rubygems puppet
+
 # Write base environment settings to our global /etc/environment file
-# all scripts will depend on this file - it is global
+# all scripts will depend on this file - it is global.
 # use the puppet FACTER_xxx syntax so that the settings
 # will becoe automatically available in puppet
-echo "export FACTER_iteego_environment=${ITEEGO_ENVIRONMENT}" >>/etc/environment
-echo "export FACTER_iteego_branch=${ITEEGO_BRANCH}" >>/etc/environment
-
-# Update our system from bare minimum to usable level
-apt-get -q -y --force-yes update
-apt-get -q -y --force-yes install lsb-core git rubygems puppet
 
 # Information about our linux release (ubuntu/debian)
 # Write all of the info from lsb-release into /etc/environment as puppet facts
@@ -59,24 +67,18 @@ echo "export FACTER_distrib_release=$(lsb_release -r -s)" >>/etc/environment
 echo "export FACTER_distrib_codename=$(lsb_release -c -s)" >>/etc/environment
 echo "export FACTER_distrib_description=\"$(lsb_release -d -s)\"" >>/etc/environment
 
+# Filter environment and store as facter values in /etc/environment
+set | grep ITEEGO | sed 's/\([^=]*\)=\(.*\)/export FACTER_\L\1=\2/g' >>/etc/environment
+
+# Once all variables have been defined, load them up
+. /etc/environment
 
 # Deploy our SSH key
-[ -d ~/.ssh ] || mkdir ~/.ssh
-echo "$ITEEGO_RSA_KEY" >~/.ssh/id_rsa
+[ -d /root/.ssh ] || mkdir /root/.ssh
+echo "$RSA_KEY" >~/.ssh/id_rsa
 echo "StrictHostKeyChecking=no" >>~/.ssh/config
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/*
-
-# Set the host name to node name to tell puppet which node to invoke
-echo "${ITEEGO_NODE}.${ITEEGO_DOMAIN}" >/etc/hostname
-
-# Update hostname and restart the hostname service
-sed -i "s/\(127.0.0.1[[:space:]]*.*\)/\1 ${ITEEGO_NODE}.${ITEEGO_DOMAIN} ${ITEEGO_NODE}/g" /etc/hosts
-hostname $ITEEGO_NODE.$ITEEGO_DOMAIN
-HOSTNAME_SERVICE=$(ls /etc/init.d/ | grep hostname)
-service $HOSTNAME_SERVICE stop
-service $HOSTNAME_SERVICE start
-
 
 # Pull down our system manifest (first remove the stock puppet config)
 rm -fR /etc/puppet &>/dev/null
@@ -93,15 +95,16 @@ LOG_FILE=/var/log/puppet/puppet.log
 touch $LOG_FILE
 chmod 600 $LOG_FILE
 
-# schedule puppet to run every minute
+# Puppet uses hostname -s to determine which node to run
+echo "${FACTER_iteego_node}.${FACTER_iteego_domain}" >/etc/hostname
+sed -i "s/\(127.0.0.1[[:space:]]*.*\)/\1 ${FACTER_iteego_node}.${FACTER_iteego_domain} ${FACTER_iteego_node}/g" /etc/hosts
+
+# schedule puppet to run at reboot
 echo 'SHELL=/bin/bash' >/tmp/.cron
 echo 'MAILTO=admin@iteego.com' >>/tmp/.cron
-echo -n "${ITEEGO_POLL_SCHEDULE}" >>/tmp/.cron
-echo ' [ -e /etc/puppet/files/bin/update.sh ] && /etc/puppet/files/bin/update.sh &>> /var/log/puppet/puppet.log' >>/tmp/.cron
+echo '@reboot /etc/puppet/files/bin/update.sh &>> /var/log/puppet/puppet.log' >>/tmp/.cron
 crontab /tmp/.cron
 rm /tmp/.cron
 
-# reboot for good measure
-/sbin/shutdown -r now
-
-exit 0
+# Reboot
+shutdown -r now

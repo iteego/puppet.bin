@@ -51,7 +51,7 @@ then
   user_data_file=$(mktemp -t user-data) 
   cat $1/$2.txt > $user_data_file
   echo "" >> $user_data_file
-  echo "ITEEGO_RSA_KEY=\$(cat <<SETVAR" >> $user_data_file
+  echo "RSA_KEY=\$(cat <<SETVAR" >> $user_data_file
   echo "$(cat keys/id_rsa)" >> $user_data_file
   echo "SETVAR" >> $user_data_file
   echo ")" >> $user_data_file
