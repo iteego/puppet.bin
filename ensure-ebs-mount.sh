@@ -9,8 +9,8 @@ volumeid=$5
 ebsdevicetomount=$6
 localdevicetomount=$7
 
-res=$(euca-describe-volumes -I $key -S "$secret" --url $url --show-empty-fields $volumeid)
-state=$(echo "$res" | grep VOLUME | awk '{print $6}')
+res=$(euca-describe-volumes -a $key -s "$secret" --url $url $volumeid)
+state=$(echo "$res" | grep VOLUME | awk '{print $5}')
 inst=$(echo "$res" | grep ATTACHMENT | awk '{print $3}')
 echo state=$state, inst=$inst
 
@@ -23,8 +23,9 @@ then
     until [ $state == available ] || [ $counter -ge $timeout ]
     do
         sleep 1; let counter=counter+1
-        res=$(euca-describe-volumes -I $key -S "$secret" --url $url --show-empty-fields $volumeid)
-        state=$(echo "$res" | grep VOLUME | awk '{print $6}')
+        res=$(euca-describe-volumes -a $key -s "$secret" --url $url $volumeid)
+        echo "res=$res"
+        state=$(echo "$res" | grep VOLUME | awk '{print $5}')
         echo state=$state
     done
 fi
@@ -40,8 +41,9 @@ then
           || [ $counter -ge $timeout ]
     do
         sleep 1; let counter=counter+1
-        res=$(euca-describe-volumes -I $key -S "$secret" --url $url --show-empty-fields $volumeid)
-        state=$(echo "$res" | grep VOLUME | awk '{print $6}')
+        res=$(euca-describe-volumes -a $key -s "$secret" --url $url $volumeid)
+        echo "res=$res"
+        state=$(echo "$res" | grep VOLUME | awk '{print $5}')
         inst=$(echo "$res" | grep ATTACHMENT | awk '{print $3}')
         echo state=$state, inst=$inst
     done
