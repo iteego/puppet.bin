@@ -52,7 +52,7 @@
 # Update our system to usable level
 apt-get -q -y --force-yes update
 apt-get -q -y --force-yes dist-upgrade
-apt-get -q -y --force-yes install lsb-core curl git rubygems puppet
+apt-get -q -y --force-yes install lsb-core git rubygems puppet
 
 # Write base environment settings to our global /etc/environment file
 # all scripts will depend on this file - it is global.
