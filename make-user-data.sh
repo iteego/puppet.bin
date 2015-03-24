@@ -56,10 +56,10 @@ then
   echo "SETVAR" >> $user_data_file
   echo ")" >> $user_data_file
   echo "" >> $user_data_file
-  cat bin/lib/user-data.txt >> $user_data_file
+  echo "apt-get -q -y --force-yes update" >> $user_data_file
+  echo "apt-get -q -y --force-yes install curl" >> $user_data_file
+  echo "curl https://raw.githubusercontent.com/iteego/puppet.bin/master/bootstrap.sh | bash" >> $user_data_file
   echo "echo \"$(gzip -9 -c $user_data_file | base64)\" | base64 -d | gunzip -c | bash"
-  #for debugging:
-  #echo "$(gzip -9 -c $user_data_file | base64)" | base64 -D | gunzip -c
   rm $user_data_file
 else
   echo "Based on the input parameters, you need to create a folder called \"${1}\" and inside it a file called \"${2}.txt\"."
