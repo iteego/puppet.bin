@@ -51,14 +51,21 @@ then
   user_data_file=$(mktemp -t user-data) 
   cat $1/$2.txt > $user_data_file
   echo "" >> $user_data_file
-  echo "RSA_KEY=\$(cat <<SETVAR" >> $user_data_file
+  echo "export RSA_KEY=\$(cat <<SETVAR" >> $user_data_file
   echo "$(cat keys/id_rsa)" >> $user_data_file
   echo "SETVAR" >> $user_data_file
   echo ")" >> $user_data_file
-  echo "" >> $user_data_file
-  echo "apt-get -q -y --force-yes update" >> $user_data_file
-  echo "apt-get -q -y --force-yes install curl" >> $user_data_file
-  echo "curl https://raw.githubusercontent.com/iteego/puppet.bin/master/bootstrap.sh | bash" >> $user_data_file
+  cat >>$user_data_file <<EOF
+    apt-get -q -y --force-yes update
+    apt-get -q -y --force-yes install git lsb-core rubygems puppet
+    rm -fR /etc/puppet &>/dev/null
+    git clone \$ITEEGO_REPO /etc/puppet
+    chmod 701 /etc/puppet
+    pushd /etc/puppet &>/dev/null
+    git checkout $ITEEGO_BRANCH
+    files/bin/bootstrap.sh
+    popd &>/dev/null
+EOF
   echo "echo \"$(gzip -9 -c $user_data_file | base64)\" | base64 -d | gunzip -c | bash"
   rm $user_data_file
 else
