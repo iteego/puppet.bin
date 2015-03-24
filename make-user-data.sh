@@ -56,15 +56,20 @@ then
   echo "SETVAR" >> $user_data_file
   echo ")" >> $user_data_file
   cat >>$user_data_file <<EOF
-    apt-get -q -y --force-yes update
-    apt-get -q -y --force-yes install git lsb-core rubygems puppet
-    rm -fR /etc/puppet &>/dev/null
-    git clone \$ITEEGO_REPO /etc/puppet
-    chmod 701 /etc/puppet
-    pushd /etc/puppet &>/dev/null
-    git checkout $ITEEGO_BRANCH
-    files/bin/bootstrap.sh
-    popd &>/dev/null
+apt-get -q -y --force-yes update
+apt-get -q -y --force-yes install git lsb-core rubygems puppet
+[ -d /root/.ssh ] || mkdir /root/.ssh
+echo "\$RSA_KEY" >/root/.ssh/id_rsa
+echo "StrictHostKeyChecking=no" >>/root/.ssh/config
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/*
+rm -fR /etc/puppet &>/dev/null
+git clone \$ITEEGO_REPO /etc/puppet
+chmod 701 /etc/puppet
+cd /etc/puppet
+git checkout \$ITEEGO_BRANCH
+cd files/bin
+./bootstrap.sh
 EOF
   echo "echo \"$(gzip -9 -c $user_data_file | base64)\" | base64 -d | gunzip -c | bash"
   rm $user_data_file

@@ -49,11 +49,6 @@
 ########################################
 # DO THE WORK
 
-# Update our system to usable level
-apt-get -q -y --force-yes update
-apt-get -q -y --force-yes dist-upgrade
-apt-get -q -y --force-yes install lsb-core git rubygems puppet
-
 # Write base environment settings to our global /etc/environment file
 # all scripts will depend on this file - it is global.
 # use the puppet FACTER_xxx syntax so that the settings
@@ -73,23 +68,6 @@ set | grep ITEEGO | sed 's/\([^=]*\)=\(.*\)/export FACTER_\L\1=\2/g' >>/etc/envi
 # Once all variables have been defined, load them up
 . /etc/environment
 
-# Deploy our SSH key
-[ -d /root/.ssh ] || mkdir /root/.ssh
-echo "$RSA_KEY" >/root/.ssh/id_rsa
-echo "StrictHostKeyChecking=no" >>/root/.ssh/config
-chmod 700 /root/.ssh
-chmod 600 /root/.ssh/*
-
-# Pull down our system manifest (first remove the stock puppet config)
-rm -fR /etc/puppet &>/dev/null
-git clone $FACTER_iteego_repo /etc/puppet
-chmod 701 /etc/puppet
-pushd /etc/puppet &>/dev/null
-git checkout $FACTER_iteego_branch
-#git submodule init
-#git submodule update
-popd &>/dev/null
-
 # Make a log file for puppet
 LOG_FILE=/var/log/puppet/puppet.log
 touch $LOG_FILE
@@ -106,5 +84,6 @@ echo '@reboot /etc/puppet/files/bin/update.sh &>> /var/log/puppet/puppet.log' >>
 crontab /tmp/.cron
 rm /tmp/.cron
 
-# Reboot
+# Do a system update and reboot
+apt-get -q -y --force-yes dist-upgrade
 shutdown -r now
