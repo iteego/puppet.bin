@@ -1,4 +1,4 @@
-#-*- mode: sh; -*-
+#!/bin/bash
 
 ########################################
 # REQUIRED VARIABLES
